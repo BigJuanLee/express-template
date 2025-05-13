@@ -3,8 +3,12 @@ const express = require('express')
 const app = express()
 const helmet = require('helmet')
 const uploadRouter = require('./router/upload')
+const apiRouter = require('./router/api')
+
 const path = require('path')
 app.use('/upload', uploadRouter)
+app.use('/api', apiRouter)
+
 //自动添加一些重要的安全头
 app.use(helmet())
 // 解析 application/x-www-form-urlencoded
