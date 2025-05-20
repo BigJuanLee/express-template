@@ -1,4 +1,4 @@
-const { mongoClient } = require('../../connect')
+const { mongoClient } = require('./connect')
 
 async function getDB(dbName = 'local') {
     const client = await mongoClient
@@ -10,4 +10,4 @@ async function getCollection(dbName, collectionName) {
     return db.collection(collectionName)
 }
 
-module.exports = { getCollection }
+module.exports = { getDB, getCollection }

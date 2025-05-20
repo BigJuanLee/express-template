@@ -4,7 +4,7 @@ const { getCollection } = require('../utils/dbHelper')
 
 router.get('/logs', async (req, res) => {
     try {
-        const logCollection = await getCollection('t_database', 'menu')
+        const bookCollection = await getCollection('t_database', 'book')
         /*
             find(query,projection)
             query:
@@ -29,9 +29,50 @@ router.get('/logs', async (req, res) => {
             projection:
             { name: 1, email: 1 }控制字段返回 1显示 0隐藏不能混用除了_id
         */
-        const data = await logCollection.find().toArray()
-        res.json(data)
+        // const query = {
+        //     length: { $lt: 1000 }
+        // }
+        const projection = { author: 0 }
+        // const data = await bookCollection.find(query, projection).toArray()
+        const {
+            // searchKey = {},
+            sortBy = "",
+            page = 1,
+            pageSize = 10
+        } = req.query
+
+        /*
+            find方法返回cursor对象不能直接转换成json返回
+            toArray()、forEach 或 next() 提取文档数据
+            处理大数据用forEach或分页limit
+            const data = await collect.find()
+            const result = []
+            await data.forEach(doc=>{
+                result.push(doc)    
+            })
+            res.json(result)
+        */
+        const data = await bookCollection.find({}, projection).sort({ [sortBy]: 1 }).skip((page - 1) * pageSize).limit(Number(pageSize)).toArray()
+        /*
+            estimatedDocumentCount 统计集合文档数，不支持查询条件
+            countDocuments 精确统计 匹配查询条件 的文档数量
+        */
+        const total = await bookCollection.estimatedDocumentCount();
+
+        /*
+            bookCollection.distinct("author",query);
+            返回文档某个字段所有唯一值
+        */
+        res.json({
+            total,
+            page,
+            pageSize,
+            isLastPage: (total < page * pageSize),
+            data
+        })
     } catch (error) {
+        console.log(error, 57);
+
         res.status(500).json({ error })
     }
 })
